@@ -109,15 +109,23 @@ describe("Endpoints", () => {
     beforeEach(async () => {
       await sequelize.sync({ force: true }); // recreate db
       ({ token, user } = await createTestUser(testUserData));
-      kitten = await Kitten.create({ ...testKittenData, ownerId: user.id });
+      kitten = await Kitten.create({
+        ...testKittenData,
+        ownerId: user.id,
+      });
     });
     describe("GET /kittens/:id", () => {
       it("should return a single cat", async () => {
+        // console.log(user);
+        // console.log(kitten);
         const response = await request(app)
           .get(`/kittens/${kitten.id}`)
           .set("Authorization", `Bearer ${token}`);
         expect(response.status).toBe(200);
-        expect(response.body).toEqual(testKittenData);
+        expect(response.body).toEqual({
+          ...testKittenData,
+          user: { id: user.id, username: user.username },
+        });
       });
       it("should return 401 if no token", async () => {
         const response = await request(app).get(`/kittens/${kitten.id}`);

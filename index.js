@@ -79,15 +79,15 @@ app.get("/kittens/:id", verifyUser, async (req, res) => {
     return res.sendStatus(401);
   }
 
-  const kitten = await Kitten.findByPk(req.params.id);
+  const kitten = await Kitten.findByPk(req.params.id, { include: "user" });
 
-  if (!kitten || kitten.ownerId !== req.user.id) {
+  if (!kitten || kitten.user.id !== req.user.id) {
     return res.sendStatus(401);
   }
-  const { name, age, color } = kitten;
-  res.send({ name, age, color });
+  const { name, age, color, ownerId, user } = kitten;
+  const { id, username } = user;
+  res.send({ name, age, color, user: { id, username } });
 });
-
 // POST /kittens
 // TODO - takes req.body of {name, age, color} and creates a new cat with the given name, age, and color
 app.post("/kittens", verifyUser, async (req, res) => {
